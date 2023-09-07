@@ -1,8 +1,15 @@
+# Spring
 spring:
+  # DB
   datasource:
-    url: jdbc:postgresql://localhost:5432/shorturldb
-    username: postgres
-    password: postgres
+#    url: jdbc:postgresql://localhost:5432/shorturldb
+#    username: postgres
+#    password: postgres
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  # Hibernate
   jpa:
     generate-ddl: 'true'
     properties:
@@ -10,10 +17,14 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+
+# Swagger
 springdoc:
   swagger-ui:
     path: /swagger-ui
     enabled: true
+
+# JWT
 app:
   jwtSecret: SecretKeyLongForSecurityLongBecauseNeedMoreThen512BitsAndIDontKnowWhatWriteToThisKey3Bit
   jwtExpirationMs: 86400000

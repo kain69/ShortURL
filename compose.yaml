@@ -1,9 +1,30 @@
 services:
+  backend:
+    container_name: backend
+    image: kain69/backend:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/shorturldb
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
   postgres:
+    container_name: postgres
     image: 'postgres:latest'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=shorturldb'
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
     ports:
-      - '5432'
+      - '5432:5432'
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d  # Это место для ваших инициализационных скриптов
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata: {}
