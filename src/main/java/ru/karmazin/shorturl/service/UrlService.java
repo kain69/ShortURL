@@ -20,17 +20,18 @@ import java.util.stream.Collectors;
 public class UrlService {
     private final UrlRepository urlRepository;
     private final UrlShortening urlShortening;
-    private final LinkRedirectService linkRedirectService;
+    private final StatisticsService statisticsService;
 
     public UrlService(UrlRepository urlRepository,
-                      UrlShortening urlShortening, LinkRedirectService linkRedirectService) {
+                      UrlShortening urlShortening, StatisticsService statisticsService) {
         this.urlRepository = urlRepository;
         this.urlShortening = urlShortening;
-        this.linkRedirectService = linkRedirectService;
+        this.statisticsService = statisticsService;
     }
 
     public List<UrlDto> getUrlsForUser(User user) {
         return urlRepository.findByUser(user).stream().map(url -> new UrlDto(
+                url.getId(),
                 url.getOriginalUrl(),
                 url.getShortUrl(),
                 url.getCreatedDate(),
@@ -59,6 +60,7 @@ public class UrlService {
         url = optionalUrl.orElseGet(() -> createUrl(urlCreateDto, user));
 
         return new UrlDto(
+                url.getId(),
                 url.getOriginalUrl(),
                 url.getShortUrl(),
                 url.getCreatedDate(),
@@ -73,8 +75,13 @@ public class UrlService {
         var url = urlRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("ShortUrl not found: " + shortUrl));
         url.setCountRequests(url.getCountRequests() + 1);
-        linkRedirectService.recordLinkRedirect(url);
+        statisticsService.recordLinkRedirect(url);
         return url.getOriginalUrl();
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        urlRepository.delete(this.getUrlById(id));
     }
 
     private Url createUrl(UrlCreateDto urlCreateDto, User user) {
@@ -89,10 +96,5 @@ public class UrlService {
         var shortUrl = urlShortening.idToShortURL(entity.getId());
         url.setShortUrl(shortUrl);
         return url;
-    }
-
-    @Transactional
-    public void delete(Long id) {
-        urlRepository.delete(this.getUrlById(id));
     }
 }

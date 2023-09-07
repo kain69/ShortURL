@@ -6,8 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.karmazin.shorturl.dto.UrlDto;
+import ru.karmazin.shorturl.model.Url;
 import ru.karmazin.shorturl.pojo.Statistics;
-import ru.karmazin.shorturl.service.LinkRedirectService;
+import ru.karmazin.shorturl.service.StatisticsService;
 
 import java.util.List;
 
@@ -16,30 +18,36 @@ import java.util.List;
 @Tag(name = "Статистика", description = "Методы для получения статистики")
 public class StatisticsController {
 
-    private final LinkRedirectService linkRedirectService;
+    private final StatisticsService statisticsService;
 
-    public StatisticsController(LinkRedirectService linkRedirectService) {
-        this.linkRedirectService = linkRedirectService;
+    public StatisticsController(StatisticsService statisticsService) {
+        this.statisticsService = statisticsService;
     }
 
     @Operation(summary = "Статистика по дням")
     @GetMapping("/statistics/daily")
     public ResponseEntity<List<Statistics>> getDailyStatistics() {
-        List<Statistics> dailyStatistics = linkRedirectService.getRedirectsByDay();
+        List<Statistics> dailyStatistics = statisticsService.getRedirectsByDay();
         return ResponseEntity.ok(dailyStatistics);
     }
 
     @Operation(summary = "Статистика по часам")
     @GetMapping("/statistics/hourly")
     public ResponseEntity<List<Statistics>> getHourlyStatistics() {
-        List<Statistics> hourlyStatistics = linkRedirectService.getRedirectsByHour();
+        List<Statistics> hourlyStatistics = statisticsService.getRedirectsByHour();
         return ResponseEntity.ok(hourlyStatistics);
     }
 
     @Operation(summary = "Статистика по минутам")
     @GetMapping("/statistics/minutly")
     public ResponseEntity<List<Statistics>> getMinuteStatistics() {
-        List<Statistics> minuteStatistics = linkRedirectService.getRedirectsByMinute();
+        List<Statistics> minuteStatistics = statisticsService.getRedirectsByMinute();
         return ResponseEntity.ok(minuteStatistics);
+    }
+
+    @Operation(summary = "Топ 20 ссылок по переходам")
+    @GetMapping("/statistics/top")
+    public ResponseEntity<List<UrlDto>> getTopUrl() {
+        return ResponseEntity.ok(statisticsService.getTop20Urls());
     }
 }

@@ -74,6 +74,7 @@ public class UrlController {
             if (optionalUrl.isPresent()) {
                 Url url = optionalUrl.get();
                 return ResponseEntity.ok(new UrlDto(
+                        url.getId(),
                         url.getOriginalUrl(),
                         url.getShortUrl(),
                         url.getCreatedDate(),

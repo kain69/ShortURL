@@ -9,7 +9,7 @@ import ru.karmazin.shorturl.pojo.Statistics;
 import java.util.List;
 
 @Repository
-public interface LinkRedirectRepository extends JpaRepository<LinkRedirect, Long> {
+public interface StatisticsRepository extends JpaRepository<LinkRedirect, Long> {
 //    @Query("SELECT DATE_TRUNC('day', lr.timestamp) AS date_time, COUNT(*) AS count FROM LinkRedirect lr GROUP BY date_time")
     @Query(nativeQuery = true)
     List<Statistics> findAllByGroupedByDay();

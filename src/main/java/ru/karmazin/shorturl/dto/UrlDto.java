@@ -10,6 +10,8 @@ import java.util.Date;
 @AllArgsConstructor
 @Schema(description = "Информация о Url")
 public class UrlDto {
+    @Schema(description = "Идентификатор")
+    private Long id;
     @Schema(description = "Оригинальная ссылка")
     private String originalUrl;
     @Schema(description = "Сокращенная ссылка")
