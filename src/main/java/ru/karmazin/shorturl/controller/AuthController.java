@@ -1,5 +1,7 @@
 package ru.karmazin.shorturl.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Tag(name = "Авторизация", description = "Методы для авторизации и регистрации")
 public class AuthController {
 
     @Autowired
@@ -45,6 +48,7 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Operation(summary = "Авторизация")
     @PostMapping("/signin")
     public ResponseEntity<?> authUser(@RequestBody LoginRequest loginRequest) {
 
@@ -67,6 +71,7 @@ public class AuthController {
                 roles));
     }
 
+    @Operation(summary = "Регистрация")
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignupRequest signupRequest) {
 

@@ -20,28 +20,30 @@ import java.util.stream.Collectors;
 public class UrlService {
     private final UrlRepository urlRepository;
     private final UrlShortening urlShortening;
+    private final LinkRedirectService linkRedirectService;
 
     public UrlService(UrlRepository urlRepository,
-                      UrlShortening urlShortening) {
+                      UrlShortening urlShortening, LinkRedirectService linkRedirectService) {
         this.urlRepository = urlRepository;
         this.urlShortening = urlShortening;
+        this.linkRedirectService = linkRedirectService;
     }
 
     public List<UrlDto> getUrlsForUser(User user) {
         return urlRepository.findByUser(user).stream().map(url -> new UrlDto(
-            url.getOriginalUrl(),
-            url.getShortUrl(),
-            url.getCreatedDate(),
-            url.getCountRequests(),
-            url.getUser().getId()
+                url.getOriginalUrl(),
+                url.getShortUrl(),
+                url.getCreatedDate(),
+                url.getCountRequests(),
+                url.getUser().getId()
         )).collect(Collectors.toList());
     }
 
     public Optional<Url> getUrlByIdForUser(User user, Long urlId) {
-        return urlRepository.findUrlByIdAndUser(urlId ,user);
+        return urlRepository.findUrlByIdAndUser(urlId, user);
     }
 
-    public Url getUrlById(long id){
+    public Url getUrlById(long id) {
         return urlRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Url not found with id: " + id));
     }
@@ -68,10 +70,11 @@ public class UrlService {
     @Transactional
     public String redirectToOriginalUrl(String shortUrl) {
         var id = urlShortening.shortURLtoID(shortUrl);
-        var entity = urlRepository.findById(id)
+        var url = urlRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("ShortUrl not found: " + shortUrl));
-        entity.setCountRequests(entity.getCountRequests() + 1);
-        return entity.getOriginalUrl();
+        url.setCountRequests(url.getCountRequests() + 1);
+        linkRedirectService.recordLinkRedirect(url);
+        return url.getOriginalUrl();
     }
 
     private Url createUrl(UrlCreateDto urlCreateDto, User user) {
