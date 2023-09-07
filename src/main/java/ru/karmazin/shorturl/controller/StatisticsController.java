@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.karmazin.shorturl.dto.UrlDto;
-import ru.karmazin.shorturl.model.Url;
 import ru.karmazin.shorturl.pojo.Statistics;
 import ru.karmazin.shorturl.service.StatisticsService;
 
