@@ -5,12 +5,15 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.karmazin.shorturl.dto.UrlCreateDto;
 import ru.karmazin.shorturl.dto.UrlDto;
 import ru.karmazin.shorturl.model.Url;
+import ru.karmazin.shorturl.model.User;
 import ru.karmazin.shorturl.repository.UrlRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,14 +21,29 @@ public class UrlService {
     private final UrlRepository urlRepository;
     private final UrlShortening urlShortening;
 
-    public UrlService(UrlRepository urlRepository, UrlShortening urlShortening) {
+    public UrlService(UrlRepository urlRepository,
+                      UrlShortening urlShortening) {
         this.urlRepository = urlRepository;
         this.urlShortening = urlShortening;
     }
 
+    public List<UrlDto> getUrlsForUser(User user) {
+        return urlRepository.findByUser(user).stream().map(url -> new UrlDto(
+            url.getOriginalUrl(),
+            url.getShortUrl(),
+            url.getCreatedDate(),
+            url.getCountRequests(),
+            url.getUser().getId()
+        )).collect(Collectors.toList());
+    }
+
+    public Optional<Url> getUrlByIdForUser(User user, Long urlId) {
+        return urlRepository.findUrlByIdAndUser(urlId ,user);
+    }
+
     public Url getUrlById(long id){
         return urlRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("ShortUrl not found with id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Url not found with id: " + id));
     }
 
     public List<Url> getAll() {
@@ -33,16 +51,17 @@ public class UrlService {
     }
 
     @Transactional
-    public UrlDto createShortUrl(UrlCreateDto urlCreateDto) {
+    public UrlDto createShortUrl(UrlCreateDto urlCreateDto, User user) {
         Url url;
-        Optional<Url> optionalUrl = urlRepository.findByOriginalUrl(urlCreateDto.getOriginalUrl());
-        url = optionalUrl.orElseGet(() -> createUrl(urlCreateDto));
+        Optional<Url> optionalUrl = urlRepository.findByOriginalUrlAndUser(urlCreateDto.getOriginalUrl(), user);
+        url = optionalUrl.orElseGet(() -> createUrl(urlCreateDto, user));
 
         return new UrlDto(
                 url.getOriginalUrl(),
                 url.getShortUrl(),
                 url.getCreatedDate(),
-                url.getCountRequests()
+                url.getCountRequests(),
+                url.getUser().getId()
         );
     }
 
@@ -55,11 +74,12 @@ public class UrlService {
         return entity.getOriginalUrl();
     }
 
-    private Url createUrl(UrlCreateDto urlCreateDto) {
+    private Url createUrl(UrlCreateDto urlCreateDto, User user) {
         var url = new Url();
         url.setOriginalUrl(urlCreateDto.getOriginalUrl());
         url.setCreatedDate(new Date());
         url.setCountRequests(0);
+        url.setUser(user);
 
         var entity = urlRepository.save(url);
 
@@ -69,7 +89,7 @@ public class UrlService {
     }
 
     @Transactional
-    public void delete(int id) {
+    public void delete(Long id) {
         urlRepository.delete(this.getUrlById(id));
     }
 }

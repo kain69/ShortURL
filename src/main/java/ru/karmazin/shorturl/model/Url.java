@@ -25,4 +25,8 @@ public class Url {
     private Date createdDate;
 
     private int countRequests;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }

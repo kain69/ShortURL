@@ -18,4 +18,6 @@ public class UrlDto {
     private Date createdDate;
     @Schema(description = "Количество переходов по ссылке")
     private int countRequests;
+    @Schema(description = "Пользователь создавший ссылку")
+    private Long userId;
 }
