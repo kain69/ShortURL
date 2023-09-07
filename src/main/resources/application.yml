@@ -8,7 +8,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: /swagger-ui
     enabled: true
+app:
+  jwtSecret: SecretKeyLongForSecurityLongBecauseNeedMoreThen512BitsAndIDontKnowWhatWriteToThisKey3Bit
+  jwtExpirationMs: 86400000

@@ -14,7 +14,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/")
 @Tag(name = "Ссылка", description = "Методы для работы с ссылками")
 public class UrlController {
     private final UrlService urlService;
@@ -32,7 +32,7 @@ public class UrlController {
     @Operation(summary = "Получение информации о ссылке по id")
     @GetMapping("url/{id}")
     public Url getUrl(@PathVariable int id) {
-        return urlService.getUrl(id);
+        return urlService.getUrlById(id);
     }
 
     // TODO: После создания нового URL индексы увеличиваются на 50, исправить
@@ -42,6 +42,13 @@ public class UrlController {
         return urlService.createShortUrl(request);
     }
 
+    @Operation(summary = "Удаление короткой ссылки")
+    @DeleteMapping("url/{id}")
+    public ResponseEntity<HttpStatus> deleteUrl(@PathVariable("id") int id) {
+        urlService.delete(id);
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
+    }
+
     @Operation(summary = "Редирект по короткой ссылке")
     @GetMapping("{shortUrl}")
     public ResponseEntity<Void> redirectToOriginalUrl(@PathVariable String shortUrl) {
@@ -49,12 +56,5 @@ public class UrlController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(url))
                 .build();
-    }
-
-    @Operation(summary = "Удаление короткой ссылки")
-    @DeleteMapping("url/{id}")
-    public ResponseEntity<HttpStatus> deleteUrl(@PathVariable("id") int id) {
-        urlService.delete(id);
-        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 }

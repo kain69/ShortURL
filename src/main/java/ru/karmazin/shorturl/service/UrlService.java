@@ -1,6 +1,5 @@
 package ru.karmazin.shorturl.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.karmazin.shorturl.dto.UrlCreateDto;
@@ -8,6 +7,7 @@ import ru.karmazin.shorturl.dto.UrlDto;
 import ru.karmazin.shorturl.model.Url;
 import ru.karmazin.shorturl.repository.UrlRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,9 +23,9 @@ public class UrlService {
         this.urlShortening = urlShortening;
     }
 
-    public Url getUrl(long id){
+    public Url getUrlById(long id){
         return urlRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Не существует короткой ссылки с id: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("ShortUrl not found with id: " + id));
     }
 
     public List<Url> getAll() {
@@ -50,7 +50,7 @@ public class UrlService {
     public String redirectToOriginalUrl(String shortUrl) {
         var id = urlShortening.shortURLtoID(shortUrl);
         var entity = urlRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Не существует короткой ссылки: " + shortUrl));
+                .orElseThrow(() -> new EntityNotFoundException("ShortUrl not found: " + shortUrl));
         entity.setCountRequests(entity.getCountRequests() + 1);
         return entity.getOriginalUrl();
     }
@@ -70,6 +70,6 @@ public class UrlService {
 
     @Transactional
     public void delete(int id) {
-        urlRepository.delete(this.getUrl(id));
+        urlRepository.delete(this.getUrlById(id));
     }
 }

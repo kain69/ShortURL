@@ -1,34 +1,28 @@
 package ru.karmazin.shorturl.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
 
 @Entity
-@Table(name = "url")
+@Table(name = "url", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "shortUrl")
+})
 @Getter
 @Setter
 public class Url {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column
-    @NotNull
     private String originalUrl;
 
-    @Column(unique = true)
     private String shortUrl;
 
-    @Column
-    @NotNull
     private Date createdDate;
 
-    @Column
-    @NotNull
     private int countRequests;
 }
