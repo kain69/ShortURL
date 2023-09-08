@@ -27,7 +27,7 @@ $ git clone https://github.com/kain69/ShortUrl.git
     - Откройте localhost:8080/swagger-ui
 # Как пройти регистрацию
 ```
-  POST localhost:8080/api/signup
+  POST localhost:8080/api/auth/signup
   BODY 
       {
         "username": "string",
