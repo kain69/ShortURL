@@ -31,10 +31,7 @@ $ git clone https://github.com/kain69/ShortUrl.git
   BODY 
       {
         "username": "string",
-        "password": "string",
-        "roles": [
-          "string" // "user"
-        ]
+        "password": "string"
       }
 ```
 
