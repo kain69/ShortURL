@@ -10,7 +10,7 @@
 
 ```sh
 $ git clone https://github.com/kain69/ShortUrl.git
-$ cd ShortURL 
+$ cd ShortUrl 
 $ docker-compose up 
 ```
 
