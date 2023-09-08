@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.karmazin.shorturl.model.User;
 import ru.karmazin.shorturl.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
@@ -16,10 +18,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    public User getUserById(Long id) {
-        return userRepository
-                .findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
     @Transactional

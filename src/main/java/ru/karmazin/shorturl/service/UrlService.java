@@ -44,13 +44,20 @@ public class UrlService {
         return urlRepository.findUrlByIdAndUser(urlId, user);
     }
 
-    public Url getUrlById(long id) {
-        return urlRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Url not found with id: " + id));
+    public Optional<Url> getUrlById(long id) {
+        return urlRepository.findById(id);
     }
 
-    public List<Url> getAll() {
-        return urlRepository.findAll();
+    public List<UrlDto> getAll() {
+        List<Url> urls = urlRepository.findAll();
+        return urls.stream().map(url -> new UrlDto(
+                url.getId(),
+                url.getOriginalUrl(),
+                url.getShortUrl(),
+                url.getCreatedDate(),
+                url.getCountRequests(),
+                url.getUser().getId()
+        )).collect(Collectors.toList());
     }
 
     @Transactional
@@ -81,7 +88,7 @@ public class UrlService {
 
     @Transactional
     public void delete(Long id) {
-        urlRepository.delete(this.getUrlById(id));
+        urlRepository.delete(this.getUrlById(id).orElseThrow(EntityNotFoundException::new));
     }
 
     private Url createUrl(UrlCreateDto urlCreateDto, User user) {

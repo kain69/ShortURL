@@ -84,24 +84,30 @@ public class AuthController {
         User user = new User(signupRequest.getUsername(),
                 passwordEncoder.encode(signupRequest.getPassword()));
 
-        Set<String> reqRoles = signupRequest.getRoles();
+//        Set<String> reqRoles = signupRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
-        if (reqRoles == null) {
+//        if (reqRoles == null) {
             Role userRole = roleRepository
                     .findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
+                    .orElseThrow(() -> new RuntimeException("Error: Role USER is not found"));
             roles.add(userRole);
-        } else {
-            reqRoles.forEach(r -> {
-                if (r.equals("user")) {
-                    Role userRole = roleRepository
-                            .findByName(ERole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
-                    roles.add(userRole);
-                }
-            });
-        }
+//        } else {
+//            reqRoles.forEach(r -> {
+//                switch (r) {
+//                    case "user" -> {
+//                        Role userRole = roleRepository
+//                                .findByName(ERole.ROLE_USER)
+//                                .orElseThrow(() -> new RuntimeException("Error: Role USER is not found"));
+//                        roles.add(userRole);
+//                    }
+//                    default -> {
+//                        throw new RuntimeException("Error: Role not found");
+//                    }
+//                }
+//
+//            });
+//        }
         user.setRoles(roles);
         userRespository.save(user);
         return ResponseEntity.ok(new MessageResponse("User CREATED with id: " + user.getId()));

@@ -10,6 +10,7 @@ import ru.karmazin.shorturl.dto.UrlCreateDto;
 import ru.karmazin.shorturl.dto.UrlDto;
 import ru.karmazin.shorturl.model.Url;
 import ru.karmazin.shorturl.model.User;
+import ru.karmazin.shorturl.pojo.MessageResponse;
 import ru.karmazin.shorturl.service.UrlService;
 import ru.karmazin.shorturl.service.UserDetailsServiceImpl;
 
@@ -32,75 +33,90 @@ public class UrlController {
 
     @Operation(summary = "Получение информации о всех ссылках")
     @GetMapping("url")
-    public List<Url> getAll() {
+    public List<UrlDto> getAll() {
         return urlService.getAll();
     }
 
     @Operation(summary = "Получение информации о ссылке по id")
     @GetMapping("url/{id}")
-    public Url getUrl(@PathVariable int id) {
-        return urlService.getUrlById(id);
+    public ResponseEntity<?> getUrl(@PathVariable int id) {
+        Optional<Url> optionalUrl = urlService.getUrlById(id);
+        if(urlService.getUrlById(id).isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Url not found"));
+        }
+        Url url = optionalUrl.get();
+        return ResponseEntity.ok(new UrlDto(
+                url.getId(),
+                url.getOriginalUrl(),
+                url.getShortUrl(),
+                url.getCreatedDate(),
+                url.getCountRequests(),
+                url.getUser().getId()
+        ));
     }
 
     @Operation(summary = "Создание короткой ссылки для пользователя")
     @PostMapping("/user/{userId}/url")
-    public UrlDto createShortUrl(@PathVariable Long userId,
+    public ResponseEntity<?> createShortUrl(@PathVariable Long userId,
                                  @RequestBody UrlCreateDto request) {
-        User user = userDetailsService.getUserById(userId);
-        return urlService.createShortUrl(request, user);
+        Optional<User> user = userDetailsService.getUserById(userId);
+        if (user.isEmpty()){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found"));
+        }
+        UrlDto shortUrl = urlService.createShortUrl(request, user.get());
+        return ResponseEntity.ok(shortUrl);
     }
 
     @Operation(summary = "Получить ссылки у пользователя по его id")
     @GetMapping("/user/{userId}/urls")
-    public ResponseEntity<List<UrlDto>> getUrlsForUser(@PathVariable Long userId) {
-        User user = userDetailsService.getUserById(userId);
-
-        if (user != null) {
-            List<UrlDto> urls = urlService.getUrlsForUser(user);
-            return ResponseEntity.ok(urls);
-        } else {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> getUrlsForUser(@PathVariable Long userId) {
+        Optional<User> user = userDetailsService.getUserById(userId);
+        if (user.isEmpty()){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found"));
         }
+        List<UrlDto> urls = urlService.getUrlsForUser(user.get());
+        return ResponseEntity.ok(urls);
     }
 
     @Operation(summary = "Получить ссылку по id у пользователя по id")
     @GetMapping("/user/{userId}/url/{urlId}")
-    public ResponseEntity<UrlDto> getUrlForUser(@PathVariable Long userId,
+    public ResponseEntity<?> getUrlForUser(@PathVariable Long userId,
                                                 @PathVariable Long urlId) {
-        User user = userDetailsService.getUserById(userId);
-
-        if (user != null) {
-            Optional<Url> optionalUrl = urlService.getUrlByIdForUser(user, urlId);
-            if (optionalUrl.isPresent()) {
-                Url url = optionalUrl.get();
-                return ResponseEntity.ok(new UrlDto(
-                        url.getId(),
-                        url.getOriginalUrl(),
-                        url.getShortUrl(),
-                        url.getCreatedDate(),
-                        url.getCountRequests(),
-                        url.getUser().getId()
-                ));
-            }
+        Optional<User> user = userDetailsService.getUserById(userId);
+        if (user.isEmpty()){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found"));
         }
-        return ResponseEntity.badRequest().build();
+        Optional<Url> optionalUrl = urlService.getUrlByIdForUser(user.get(), urlId);
+        if (optionalUrl.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Url not found"));
+        }
+        Url url = optionalUrl.get();
+        return ResponseEntity.ok(new UrlDto(
+                url.getId(),
+                url.getOriginalUrl(),
+                url.getShortUrl(),
+                url.getCreatedDate(),
+                url.getCountRequests(),
+                url.getUser().getId()
+        ));
     }
 
     @Operation(summary = "Удалить ссылку у пользователя")
     @DeleteMapping("/user/{userId}/url/{urlId}")
-    public ResponseEntity<HttpStatus> deleteUrlForUser(@PathVariable Long userId,
+    public ResponseEntity<?> deleteUrlForUser(@PathVariable Long userId,
                                                        @PathVariable Long urlId) {
-        User user = userDetailsService.getUserById(userId);
-
-        if (user != null) {
-            Optional<Url> optionalUrl = urlService.getUrlByIdForUser(user, urlId);
-            if (optionalUrl.isPresent()) {
-                Url url = optionalUrl.get();
-                urlService.delete(url.getId());
-                return ResponseEntity.ok(HttpStatus.ACCEPTED);
-            }
+        Optional<User> user = userDetailsService.getUserById(userId);
+        if (user.isEmpty()){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found"));
         }
-        return ResponseEntity.badRequest().build();
+        Optional<Url> optionalUrl = urlService.getUrlByIdForUser(user.get(), urlId);
+        if (optionalUrl.isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Url not found"));
+        }
+
+        Url url = optionalUrl.get();
+        urlService.delete(url.getId());
+        return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
 
     @Operation(summary = "Редирект по короткой ссылке")
