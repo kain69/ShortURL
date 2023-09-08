@@ -104,6 +104,6 @@ public class AuthController {
         }
         user.setRoles(roles);
         userRespository.save(user);
-        return ResponseEntity.ok(new MessageResponse("User CREATED"));
+        return ResponseEntity.ok(new MessageResponse("User CREATED with id: " + user.getId()));
     }
 }
